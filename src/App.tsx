@@ -8,6 +8,7 @@ export default function App() {
   const [isOpenMode, setIsOpenMode] = useState(false);
   const [openedUrls, setOpenedUrls] = useState<string[]>([]);
   const [popupBlocked, setPopupBlocked] = useState(false);
+  const [urlsCopied, setUrlsCopied] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -108,6 +109,17 @@ export default function App() {
     }
   }
 
+  async function copyAllUrls() {
+    try {
+      const urlsText = openedUrls.join('\n');
+      await navigator.clipboard.writeText(urlsText);
+      setUrlsCopied(true);
+      setTimeout(() => setUrlsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy URLs: ', err);
+    }
+  }
+
   if (isOpenMode) {
     const handleGoBack = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -138,7 +150,52 @@ export default function App() {
             )}
 
             <div className="text-left bg-neutral-800 rounded-xl p-4 mt-4 max-h-64 overflow-y-auto border border-neutral-500">
-              <p className="text-blue-200 text-xs mb-2 pl-2.5 uppercase tracking-wider font-semibold">URLs to open:</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-blue-200 text-xs pl-2.5 uppercase tracking-wider font-semibold">URLs to open:</p>
+                <button
+                  onClick={copyAllUrls}
+                  className={`flex items-center gap-2 text-xs px-2 py-2 rounded-md font-semibold transition-all cursor-pointer min-w-[90px] justify-center ${
+                    urlsCopied ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {urlsCopied ? (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                      </svg>
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
               <div className="space-y-1 pr-2">
                 {openedUrls.map((url, index) => (
                   <a
